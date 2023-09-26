@@ -2197,6 +2197,33 @@ Then  apply this patch in the <span class="notranslate">`%setup`</span> section:
 
 If no errors appear during the build, the patch has been successfully applied.
 
+Instead of patching apr library we can build your custom Apache with one of the libapr-devel packages provided by CloudLinux OS Shared. Every version of CloudLinux OS Share provides two versions of libapr - system library as a package named `apr` and alternative library as a package named `alt-apr`. Their versions are listed in the following table:
+
+|-|-|-|
+|CloudLinux OS Shared version |apr version |alt-apr version |
+|6 |1.3.9 |1.7.4 |
+|7 |1.4.8 |1.7.4 |
+|8 |1.6.3 |1.7.4 |
+|9 |1.7.0 |1.7.4 |
+
+If your custom Apache already linked with not patched apr library which major version is equal to version provided by `apr` or `alt-apr` package, you can just change library symlink. For example, if your Apache binary `/usr/local/apps/apache2/bin/httpd` is linked with `/usr/local/apps/apache2/lib/libapr-1.so.0` library which, in turn, is a link to `libapr` library with 1.7.4 version, you can install `alt-apr` package and change symlink - it should link to the patched library provided by `alt-apr` package instead of original one.
+<div class="notranslate">
+
+```
+[root@cloudlinux ~]# ldd /usr/local/apps/apache2/bin/httpd | grep libapr-1.so.0
+        libapr-1.so.0 => /usr/local/apps/apache2/lib/libapr-1.so.0 (0x00007f191e35c000)
+[root@cloudlinux ~]#
+[root@cloudlinux ~]# ls -l /usr/local/apps/apache2/lib/libapr-1.so.0
+lrwxrwxrwx 1 root root 17 Feb 10  2023 /usr/local/apps/apache2/lib/libapr-1.so.0 -> libapr-1.so.0.7.4
+[root@cloudlinux ~]#
+[root@cloudlinux ~]# rpm -ql alt-apr | grep libapr-1.so.0.7.4
+/opt/alt/alt-apr17/lib64/libapr-1.so.0.7.4
+[root@cloudlinux ~]#
+[root@cloudlinux ~]# ls -sf /opt/alt/alt-apr17/lib64/libapr-1.so.0.7.4 libapr-1.so.0
+```
+</div>
+
+
 ## Hardened PHP
 
 All versions of alt-php should work properly in any control panel.
